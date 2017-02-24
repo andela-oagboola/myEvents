@@ -4,13 +4,18 @@ var server = require('../../server');
 var should = chai.should();
 chai.use(chaiHttp);
 var Events = require('../../app/models/events');
+var Users = require('../../app/models/users');
 
 describe('events', function(){
 
     var dummyEvent, dummyResponse;
     afterEach(function(done){
         Events.remove(function(){
-            done();
+        });
+        Users.remove(function(){
+            Users.remove(function(){
+                done();
+            })
         });
     });
     beforeEach(function(done){
@@ -102,6 +107,24 @@ describe('events', function(){
                     res.body.should.be.a('object');
                     res.body.should.have.property('n').eql(1);
                     res.should.have.status(200);
+                    done();
+                });
+        });
+    });
+
+    describe('/SIGNUP', function(){
+        it('should create a new user with valid credentials', function(done){
+            var user = {
+                email: 'xyz@abc.com',
+                password: 'laide'
+            }
+            chai.request(server)
+                .post('/signup')
+                .send(user)
+                .end(function(err, res){
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    res.body.should.have.property('email').eql(user.email);
                     done();
                 });
         });
